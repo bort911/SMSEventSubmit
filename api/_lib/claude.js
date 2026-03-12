@@ -13,8 +13,9 @@ const SYSTEM_PROMPT = `You are an event data extraction assistant. Extract struc
 - description: Brief one-sentence description of the event
 - price: Ticket price or cost (include currency symbol if mentioned)
 - url: Any website URL or ticket link mentioned
+- frequency: How often the event occurs. Must be one of: "Once", "Weekly", "Monthly", "Daily", or "Other". If the event mentions recurring (e.g. "every Tuesday", "monthly meetup"), pick the appropriate value. Default to "Once" if not indicated.
 
-For any field you cannot determine, use an empty string "".
+For any field you cannot determine, use an empty string "". For frequency, default to "Once".
 Return ONLY the JSON object. No markdown, no backticks, no explanation.`;
 
 async function extractEventFromText(text) {
