@@ -3,6 +3,8 @@ const fs = require("fs");
 const path = require("path");
 const { Readable } = require("stream");
 
+const DRIVE_IMG_FOLDER_ID = "11HXzfjuYgMQ9ejtIZV5p_UU_g17ocyaT";
+
 function getAuth() {
   let credentials;
   if (process.env.GOOGLE_SERVICE_ACCOUNT_KEY_FILE) {
@@ -16,50 +18,16 @@ function getAuth() {
     credentials,
     scopes: [
       "https://www.googleapis.com/auth/spreadsheets",
-      "https://www.googleapis.com/auth/drive",
+      "https://www.googleapis.com/auth/drive.file",
     ],
   });
 }
 
-// Find or create a folder by name, optionally inside a parent folder
-async function findOrCreateFolder(drive, name, parentId) {
-  const query = parentId
-    ? `name='${name}' and mimeType='application/vnd.google-apps.folder' and '${parentId}' in parents and trashed=false`
-    : `name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
-
-  const res = await drive.files.list({ q: query, fields: "files(id, name)" });
-
-  if (res.data.files.length > 0) {
-    return res.data.files[0].id;
-  }
-
-  // Create the folder
-  const fileMetadata = {
-    name,
-    mimeType: "application/vnd.google-apps.folder",
-  };
-  if (parentId) fileMetadata.parents = [parentId];
-
-  const folder = await drive.files.create({
-    requestBody: fileMetadata,
-    fields: "id",
-  });
-
-  return folder.data.id;
-}
-
-// Upload image buffer to Google Drive and return a viewable link
+// Upload image buffer to the shared Google Drive img folder
 async function uploadImageToDrive(imageBuffer, fileName, mediaType) {
   const auth = getAuth();
   const drive = google.drive({ version: "v3", auth });
 
-  // Find or create "SMS Events" folder
-  const smsEventsFolderId = await findOrCreateFolder(drive, "SMS Events");
-
-  // Find or create "img" subfolder inside "SMS Events"
-  const imgFolderId = await findOrCreateFolder(drive, "img", smsEventsFolderId);
-
-  // Upload the image
   const stream = new Readable();
   stream.push(imageBuffer);
   stream.push(null);
@@ -67,16 +35,16 @@ async function uploadImageToDrive(imageBuffer, fileName, mediaType) {
   const file = await drive.files.create({
     requestBody: {
       name: fileName,
-      parents: [imgFolderId],
+      parents: [DRIVE_IMG_FOLDER_ID],
     },
     media: {
       mimeType: mediaType,
       body: stream,
     },
-    fields: "id, webViewLink",
+    fields: "id",
   });
 
-  // Make the file viewable by anyone with the link
+  // Make viewable by anyone with the link
   await drive.permissions.create({
     fileId: file.data.id,
     requestBody: {
