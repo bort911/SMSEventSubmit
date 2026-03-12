@@ -37,7 +37,7 @@ async function appendEvent(eventData) {
   await sheets.spreadsheets.values.append({
     spreadsheetId: process.env.GOOGLE_SHEETS_ID,
     range: "Sheet1!A:J",
-    valueInputOption: "USER_ENTERED",
+    valueInputOption: "RAW",
     insertDataOption: "INSERT_ROWS",
     requestBody: { values: [row] },
   });
