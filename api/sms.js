@@ -1,5 +1,5 @@
 const { extractEventFromText, extractEventFromImage } = require("./_lib/claude");
-const { appendEvent } = require("./_lib/sheets");
+const { appendEvent, uploadImageToDrive } = require("./_lib/sheets");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
@@ -35,7 +35,14 @@ module.exports = async function handler(req, res) {
         MediaContentType0,
         Body?.trim() || ""
       );
-      eventData.imageUrl = MediaUrl0;
+
+      // Upload image to Google Drive for permanent storage
+      console.log("Uploading image to Google Drive...");
+      const ext = MediaContentType0.split("/")[1] || "jpg";
+      const fileName = `event-${Date.now()}.${ext}`;
+      const driveUrl = await uploadImageToDrive(imageBuffer, fileName, MediaContentType0);
+      eventData.imageUrl = driveUrl;
+      console.log("Image uploaded:", driveUrl);
     } else if (Body?.trim()) {
       console.log("Processing text with Claude...");
       eventData = await extractEventFromText(Body.trim());
