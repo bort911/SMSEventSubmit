@@ -28,11 +28,12 @@ async function appendEvent(eventData) {
     eventData.price || "",
     eventData.url || "",
     eventData.frequency || "Once",
+    eventData.imageUrl || "",
   ];
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: process.env.GOOGLE_SHEETS_ID,
-    range: "Sheet1!A:I",
+    range: "Sheet1!A:J",
     valueInputOption: "USER_ENTERED",
     insertDataOption: "INSERT_ROWS",
     requestBody: { values: [row] },

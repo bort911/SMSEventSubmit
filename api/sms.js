@@ -35,6 +35,7 @@ module.exports = async function handler(req, res) {
         MediaContentType0,
         Body?.trim() || ""
       );
+      eventData.imageUrl = MediaUrl0;
     } else if (Body?.trim()) {
       console.log("Processing text with Claude...");
       eventData = await extractEventFromText(Body.trim());
