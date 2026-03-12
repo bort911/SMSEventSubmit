@@ -1,9 +1,6 @@
 const { google } = require("googleapis");
 const fs = require("fs");
 const path = require("path");
-const { Readable } = require("stream");
-
-const DRIVE_IMG_FOLDER_ID = "11HXzfjuYgMQ9ejtIZV5p_UU_g17ocyaT";
 
 function getAuth() {
   let credentials;
@@ -16,44 +13,8 @@ function getAuth() {
 
   return new google.auth.GoogleAuth({
     credentials,
-    scopes: [
-      "https://www.googleapis.com/auth/spreadsheets",
-      "https://www.googleapis.com/auth/drive.file",
-    ],
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
-}
-
-// Upload image buffer to the shared Google Drive img folder
-async function uploadImageToDrive(imageBuffer, fileName, mediaType) {
-  const auth = getAuth();
-  const drive = google.drive({ version: "v3", auth });
-
-  const stream = new Readable();
-  stream.push(imageBuffer);
-  stream.push(null);
-
-  const file = await drive.files.create({
-    requestBody: {
-      name: fileName,
-      parents: [DRIVE_IMG_FOLDER_ID],
-    },
-    media: {
-      mimeType: mediaType,
-      body: stream,
-    },
-    fields: "id",
-  });
-
-  // Make viewable by anyone with the link
-  await drive.permissions.create({
-    fileId: file.data.id,
-    requestBody: {
-      role: "reader",
-      type: "anyone",
-    },
-  });
-
-  return `https://drive.google.com/uc?id=${file.data.id}`;
 }
 
 async function appendEvent(eventData) {
@@ -84,4 +45,4 @@ async function appendEvent(eventData) {
   return row;
 }
 
-module.exports = { appendEvent, uploadImageToDrive };
+module.exports = { appendEvent };
