@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "Text event details or photos to a Twilio number and they get added to a Google Sheet via Claude AI",
+  "scripts": {
+    "start": "node server.js"
+  },
   "engines": {
     "node": ">=20"
   },
