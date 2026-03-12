@@ -35,8 +35,23 @@ module.exports = async function handler(req, res) {
         Body?.trim() || ""
       );
 
-      // Store the Twilio image URL
-      eventData.imageUrl = MediaUrl0;
+      // Upload to imgBB for permanent hosting
+      console.log("Uploading image to imgBB...");
+      const imgbbForm = new URLSearchParams();
+      imgbbForm.append("key", process.env.IMGBB_API_KEY);
+      imgbbForm.append("image", base64Data);
+      const imgbbRes = await fetch("https://api.imgbb.com/1/upload", {
+        method: "POST",
+        body: imgbbForm,
+      });
+      const imgbbData = await imgbbRes.json();
+      if (imgbbData.success) {
+        eventData.imageUrl = imgbbData.data.url;
+        console.log("Image uploaded:", eventData.imageUrl);
+      } else {
+        console.log("imgBB upload failed, using Twilio URL as fallback");
+        eventData.imageUrl = MediaUrl0;
+      }
     } else if (Body?.trim()) {
       console.log("Processing text with Claude...");
       eventData = await extractEventFromText(Body.trim());
