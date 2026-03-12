@@ -1,16 +1,18 @@
-// Load env - manually parse to avoid dotenv quirks with long values
+// Load env from .env.local if it exists (local dev only)
 const fs = require("fs");
-const envContent = fs.readFileSync(".env.local", "utf8");
-envContent.split("\n").forEach((line) => {
-  const eq = line.indexOf("=");
-  if (eq > 0) {
-    const key = line.substring(0, eq).trim();
-    const val = line.substring(eq + 1).trim();
-    if (key) {
-      process.env[key] = val;
+if (fs.existsSync(".env.local")) {
+  const envContent = fs.readFileSync(".env.local", "utf8");
+  envContent.split("\n").forEach((line) => {
+    const eq = line.indexOf("=");
+    if (eq > 0) {
+      const key = line.substring(0, eq).trim();
+      const val = line.substring(eq + 1).trim();
+      if (key) {
+        process.env[key] = val;
+      }
     }
-  }
-});
+  });
+}
 
 const express = require("express");
 const smsHandler = require("./api/sms");
